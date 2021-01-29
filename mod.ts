@@ -1,107 +1,96 @@
-import {
-  join as pathJoin,
-  basename as pathBasename,
-} from "https://deno.land/std/path/mod.ts";
+import * as path from "https://deno.land/std@0.84.0/path/mod.ts";
 
-const homedir: string | null = Deno.dir("home");
-const tmpdir: string | null = Deno.dir("tmp");
+const homeDir = (
+  Deno.env.get("HOME") ||
+  Deno.env.get("HOMEPATH")
+);
 
-interface IOptions {
-  suffix: string;
+const tempDir = (
+  Deno.env.get("TEMP") ||
+  Deno.env.get("TMP") ||
+  Deno.env.get("TMPDIR")
+);
+
+export interface Paths {
+  data: string;
+  config: string;
+  cache: string;
+  log: string;
+  temp: string;
 }
 
-const macos = (name: string) => {
-  if (!homedir) {
-    throw new Error("Can't extract the home directory.");
-  }
+function linux(homeDir: string, tempDir: string, appName: string): Paths {
+  return {
+    data: path.join(
+      Deno.env.get("XDG_DATA_HOME") || path.join(homeDir, ".local", "share"),
+      appName,
+    ),
+    config: path.join(
+      Deno.env.get("XDG_CONFIG_HOME") || path.join(homeDir, ".config"),
+      appName,
+    ),
+    cache: path.join(
+      Deno.env.get("XDG_CACHE_HOME") || path.join(homeDir, ".cache"),
+      appName,
+    ),
+    log: path.join(
+      Deno.env.get("XDG_STATE_HOME") || path.join(homeDir, ".local", "state"),
+      appName,
+    ),
+    temp: path.join(tempDir, path.basename(homeDir), appName),
+  };
+}
 
-  if (!tmpdir) {
-    throw new Error("Can't extract the tmp directory.");
-  }
-
-  const library = pathJoin(homedir, "Library");
+function macos(homeDir: string, tempDir: string, appName: string): Paths {
+  const libDir = path.join(homeDir, "Library");
 
   return {
-    data: pathJoin(library, "Application Support", name),
-    config: pathJoin(library, "Preferences", name),
-    cache: pathJoin(library, "Caches", name),
-    log: pathJoin(library, "Logs", name),
-    temp: pathJoin(tmpdir, name),
+    data: path.join(libDir, "Application Support", appName),
+    config: path.join(libDir, "Preferences", appName),
+    cache: path.join(libDir, "Caches", appName),
+    log: path.join(libDir, "Logs", appName),
+    temp: path.join(tempDir, appName),
   };
-};
+}
 
-const windows = (name: string) => {
-  if (!homedir) {
-    throw new Error("Can't extract the home directory.");
-  }
-
-  if (!tmpdir) {
-    throw new Error("Can't extract the tmp directory.");
-  }
-
-  const appData = Deno.env.get("APPDATA") ||
-    pathJoin(homedir, "AppData", "Roaming");
-  const localAppData = Deno.env.get("LOCALAPPDATA") ||
-    pathJoin(homedir, "AppData", "Local");
+function windows(homeDir: string, tempDir: string, appName: string): Paths {
+  const appData =
+    (Deno.env.get("APPDATA") || path.join(homeDir, "AppData", "Roaming"));
+  const localAppData =
+    (Deno.env.get("LOCALAPPDATA") || path.join(homeDir, "AppData", "Local"));
 
   return {
-    data: pathJoin(localAppData, name, "Data"),
-    config: pathJoin(appData, name, "Config"),
-    cache: pathJoin(localAppData, name, "Cache"),
-    log: pathJoin(localAppData, name, "Log"),
-    temp: pathJoin(tmpdir, name),
+    data: path.join(localAppData, appName, "Data"),
+    config: path.join(appData, appName, "Config"),
+    cache: path.join(localAppData, appName, "Cache"),
+    log: path.join(localAppData, appName, "Log"),
+    temp: path.join(tempDir, appName),
   };
-};
+}
 
-const linux = (name: string) => {
-  if (!homedir) {
-    throw new Error("Can't extract the home directory.");
+/** Get paths for storing things like data, config, cache, etc
+ *
+ * Does not create the directories!
+ * 
+ * @param appName name of your app
+ */
+export default function appPaths(appName: string): Paths {
+  if (!homeDir) {
+    throw new Error("cannot find user home");
   }
 
-  if (!tmpdir) {
-    throw new Error("Can't extract the tmp directory.");
+  if (!tempDir) {
+    throw new Error("cannot find temp directory");
   }
 
-  const username = pathBasename(homedir);
-
-  return {
-    data: pathJoin(
-      Deno.env.get("XDG_DATA_HOME") || pathJoin(homedir, ".local", "share"),
-      name,
-    ),
-    config: pathJoin(
-      Deno.env.get("XDG_CONFIG_HOME") || pathJoin(homedir, ".config"),
-      name,
-    ),
-    cache: pathJoin(
-      Deno.env.get("XDG_CACHE_HOME") || pathJoin(homedir, ".cache"),
-      name,
-    ),
-    log: pathJoin(
-      Deno.env.get("XDG_STATE_HOME") || pathJoin(homedir, ".local", "state"),
-      name,
-    ),
-    temp: pathJoin(tmpdir, username, name),
-  };
-};
-
-export default (name: string, options: IOptions = { suffix: "deno" }) => {
-  if (typeof name !== "string") {
-    throw new TypeError(`Expected string, got ${typeof name}`);
+  switch (Deno.build.os) {
+    case "linux":
+      return linux(homeDir, tempDir, appName);
+    case "darwin":
+      return macos(homeDir, tempDir, appName);
+    case "windows":
+      return windows(homeDir, tempDir, appName);
+    default:
+      throw new Error("unknown os");
   }
-
-  // Add suffix to prevent possible conflict with native apps
-  if (options.suffix) {
-    name += `-${options.suffix}`;
-  }
-
-  if (Deno.build.os === "darwin") {
-    return macos(name);
-  }
-
-  if (Deno.build.os === "windows") {
-    return windows(name);
-  }
-
-  return linux(name);
-};
+}
