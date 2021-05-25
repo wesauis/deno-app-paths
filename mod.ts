@@ -1,15 +1,9 @@
 import * as path from "https://deno.land/std@0.97.0/path/mod.ts";
 
-const homeDir = (
-  Deno.env.get("HOME") ||
-  Deno.env.get("HOMEPATH")
-);
+const homeDir = Deno.env.get("HOME") || Deno.env.get("HOMEPATH");
 
-const tempDir = (
-  Deno.env.get("TEMP") ||
-  Deno.env.get("TMP") ||
-  Deno.env.get("TMPDIR")
-);
+const tempDir = Deno.env.get("TEMP") || Deno.env.get("TMP") ||
+  Deno.env.get("TMPDIR");
 
 export interface Paths {
   data: string;
@@ -54,10 +48,10 @@ function macos(homeDir: string, tempDir: string, appName: string): Paths {
 }
 
 function windows(homeDir: string, tempDir: string, appName: string): Paths {
-  const appData =
-    (Deno.env.get("APPDATA") || path.join(homeDir, "AppData", "Roaming"));
-  const localAppData =
-    (Deno.env.get("LOCALAPPDATA") || path.join(homeDir, "AppData", "Local"));
+  const appData = Deno.env.get("APPDATA") ||
+    path.join(homeDir, "AppData", "Roaming");
+  const localAppData = Deno.env.get("LOCALAPPDATA") ||
+    path.join(homeDir, "AppData", "Local");
 
   return {
     data: path.join(localAppData, appName, "Data"),
@@ -71,7 +65,7 @@ function windows(homeDir: string, tempDir: string, appName: string): Paths {
 /** Get paths for storing things like data, config, cache, etc
  *
  * Does not create the directories!
- * 
+ *
  * @param appName name of your app
  */
 export default function appPaths(appName: string): Paths {
