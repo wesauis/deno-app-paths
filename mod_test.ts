@@ -3,7 +3,7 @@ import appPaths from "./mod.ts";
 
 Deno.test("make sure it didnt throw any error", () => {
   const random = Math.random().toString(36).substr(2);
-  const appName = `super-cool-app-${random}`;
+  const appName = `com.yourorg.yourapp-${random}`;
 
   const paths = appPaths(appName);
 
