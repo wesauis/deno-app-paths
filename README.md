@@ -1,19 +1,44 @@
 # App Paths
 
-Get paths for storing things like data, config, cache, etc
+A [Deno](https://deno.land/) Typescript library for determining operating system appropriate paths for storing `data`, `cache`, `config`, `log` and `temp` files on macOS, Linux, and Windows.
 
-Does not create the directories!
+Please note that this library does not create any paths that don't yet exist. You can make use of the [fs](https://deno.land/std@0.97.0/fs#ensuredir) `ensureDire` and [path](https://deno.land/std@0.97.0/path) `join` STDLIB functions to help you with that.
 
-# Usage
+By convention the `appName` namespace you provide should be specified in [reverse domain name notation](https://en.wikipedia.org/wiki/Reverse_domain_name_notation) to help eliminate conflicts and make it easier to find app specific files.
+
+## API
 
 ```ts
-import appPaths from "https://github.com/wesauis/deno-app-paths/raw/0.1.1/mod.ts";
+appPaths(appName: string): Paths
 
-const paths = appPaths("super-cool-app");
+interface Paths
+  cache: string
+  config: string
+  data: string
+  log: string
+  temp: string
+```
 
-console.log(paths.data);
-//=> '/Users/user/Library/Application Support/super-cool-app'
+## Usage
 
-console.log(paths.config);
-//=> '/Users/user/Library/Preferences/super-cool-app'
+```ts
+import appPaths from "https://github.com/wesauis/deno-app-paths/raw/[CURRENT RELEASE VERSION]/mod.ts"
+
+// Specifiy an app namespace
+const paths = appPaths("com.yourorg.yourapp")
+
+console.log(paths)
+// paths: {
+//   cache: "/Users/USERNAME/Library/Caches/com.yourorg.yourapp",
+//   config: "/Users/USERNAME/Library/Preferences/com.yourorg.yourapp",
+//   data: "/Users/USERNAME/Library/Application Support/com.yourorg.yourapp",
+//   log: "/Users/USERNAME/Library/Logs/com.yourorg.yourapp",
+//   temp: "/var/folders/cg/q568zb_17fv6qx4r2lpl3g0w0000gn/T/com.yourorg.yourapp"
+// }
+
+console.log(paths.config)
+// "/Users/USERNAME/Library/Preferences/com.yourorg.yourapp"
+
+console.log(paths.data)
+// "/Users/USERNAME/Library/Application Support/com.yourorg.yourapp"
 ```
