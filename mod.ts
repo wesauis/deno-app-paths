@@ -70,7 +70,7 @@ function windows(homeDir: string, tempDir: string, appName: string): Paths {
  */
 export default function appPaths(appName: string): Paths {
   if (!homeDir) {
-    throw new Error("cannot find user home");
+    throw new Error("cannot find user home directory");
   }
 
   if (!tempDir) {
