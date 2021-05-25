@@ -1,4 +1,4 @@
-import * as path from "https://deno.land/std@0.84.0/path/mod.ts";
+import * as path from "https://deno.land/std@0.97.0/path/mod.ts";
 
 const homeDir = (
   Deno.env.get("HOME") ||
