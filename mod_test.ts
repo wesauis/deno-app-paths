@@ -9,9 +9,9 @@ Deno.test("make sure it didnt throw any error", () => {
 
   console.log({ paths, appName });
 
-  assertStringIncludes(paths.data, appName);
-  assertStringIncludes(paths.config, appName);
   assertStringIncludes(paths.cache, appName);
+  assertStringIncludes(paths.config, appName);
+  assertStringIncludes(paths.data, appName);
   assertStringIncludes(paths.log, appName);
   assertStringIncludes(paths.temp, appName);
 });
