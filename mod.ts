@@ -6,25 +6,25 @@ const tempDir = Deno.env.get("TEMP") || Deno.env.get("TMP") ||
   Deno.env.get("TMPDIR");
 
 export interface Paths {
-  data: string;
-  config: string;
   cache: string;
+  config: string;
+  data: string;
   log: string;
   temp: string;
 }
 
 function linux(homeDir: string, tempDir: string, appName: string): Paths {
   return {
-    data: path.join(
-      Deno.env.get("XDG_DATA_HOME") || path.join(homeDir, ".local", "share"),
+    cache: path.join(
+      Deno.env.get("XDG_CACHE_HOME") || path.join(homeDir, ".cache"),
       appName,
     ),
     config: path.join(
       Deno.env.get("XDG_CONFIG_HOME") || path.join(homeDir, ".config"),
       appName,
     ),
-    cache: path.join(
-      Deno.env.get("XDG_CACHE_HOME") || path.join(homeDir, ".cache"),
+    data: path.join(
+      Deno.env.get("XDG_DATA_HOME") || path.join(homeDir, ".local", "share"),
       appName,
     ),
     log: path.join(
@@ -39,9 +39,9 @@ function macos(homeDir: string, tempDir: string, appName: string): Paths {
   const libDir = path.join(homeDir, "Library");
 
   return {
-    data: path.join(libDir, "Application Support", appName),
-    config: path.join(libDir, "Preferences", appName),
     cache: path.join(libDir, "Caches", appName),
+    config: path.join(libDir, "Preferences", appName),
+    data: path.join(libDir, "Application Support", appName),
     log: path.join(libDir, "Logs", appName),
     temp: path.join(tempDir, appName),
   };
@@ -54,9 +54,9 @@ function windows(homeDir: string, tempDir: string, appName: string): Paths {
     path.join(homeDir, "AppData", "Local");
 
   return {
-    data: path.join(localAppData, appName, "Data"),
-    config: path.join(appData, appName, "Config"),
     cache: path.join(localAppData, appName, "Cache"),
+    config: path.join(appData, appName, "Config"),
+    data: path.join(localAppData, appName, "Data"),
     log: path.join(localAppData, appName, "Log"),
     temp: path.join(tempDir, appName),
   };
