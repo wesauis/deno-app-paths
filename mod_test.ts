@@ -2,6 +2,7 @@ import { assertStringIncludes } from "https://deno.land/std@0.97.0/testing/asser
 import appPaths from "./mod.ts";
 
 Deno.test("make sure it didnt throw any error", () => {
+  console.log(Deno.env);
   const random = Math.random().toString(36).substr(2);
   const appName = `com.yourorg.yourapp-${random}`;
 
