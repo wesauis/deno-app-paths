@@ -3,7 +3,7 @@ import * as path from "https://deno.land/std@0.97.0/path/mod.ts";
 const homeDir = Deno.env.get("HOME") || Deno.env.get("HOMEPATH");
 
 const tempDir = Deno.env.get("TEMP") || Deno.env.get("TMP") ||
-  Deno.env.get("TMPDIR");
+  Deno.env.get("TMPDIR") || Deno.env.get("RUNNER_TEMP");
 
 export interface Paths {
   cache: string;
